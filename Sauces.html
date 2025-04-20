@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>醬料推薦系統</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #FFF5F5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 60px auto 40px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #E60012;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab, #submit-open-button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #E60012;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      color: #E60012;
+      background-color: #fff;
+      transition: all 0.3s ease;
+    }
+    .tab:hover, #submit-open-button:hover {
+      background-color: #E60012;
+      color: #fff;
+    }
+    .tab.active {
+      background-color: #E60012;
+      color: #fff;
+    }
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin: 30px 0 20px;
+    }
+    .search-container input {
+      flex: 1;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #E60012;
+      border-radius: 5px 0 0 5px;
+    }
+    .search-container button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 1px solid #E60012;
+      border-left: none;
+      border-radius: 0 5px 5px 0;
+      background-color: #E60012;
+      color: #fff;
+      cursor: pointer;
+    }
+    .search-container button:hover {
+      background-color: #fff;
+      color: #E60012;
+    }
+    #results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 15px;
+    }
+    .card {
+      border: 1.5px solid #E60012;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+      background: #FFFDFD;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #B00000;
+    }
+    .card p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #444;
+    }
+    #submit-form {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    #submit-form .form-box {
+      background: #fff;
+      padding: 30px 70px; 
+      border-radius: 12px;
+      max-width: 450px;
+      width: 95%;
+      animation: slideUp 0.3s ease forwards;
+    }
+    #submit-form select, #submit-form input, #submit-form textarea {
+      width: 100%;
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #submit-button, #cancel-button {
+      width: 48%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #submit-button {
+      background-color: #E60012;
+      color: white;
+    }
+    #cancel-button {
+      background-color: #ccc;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>醬料小工具</h1>
+    <div class="tabs">
+      <div class="tab active" data-category="sauce">醬料總覽</div>
+      <div class="tab" data-category="broth">鍋底總覽</div>
+      <button id="submit-open-button">我要投稿</button>
+    </div>
+    <div class="search-container">
+      <input type="text" id="flavor-input" placeholder="請輸入想要的口味：辣的鍋底、酸的醬料等" />
+      <button id="search-button">搜尋</button>
+    </div>
+    <div id="results"></div>
+  </div>
+
+  <div id="submit-form">
+    <div class="form-box">
+      <h3>投稿醬料&鍋底</h3>
+      <select id="submit-category">
+        <option value="sauce">醬料</option>
+        <option value="broth">鍋底</option>
+      </select>
+      <input type="text" id="submit-name" placeholder="名稱 (例：海底撈最好吃的醬料)" required />
+      <input type="text" id="submit-ingredients" placeholder="所需醬料 (例：蠔油一勺、海鮮味碟兩勺)" required />
+      <div id="description-wrapper">
+        <textarea id="submit-description" placeholder="描述（可留空）"></textarea>
+      </div>
+      <input type="text" id="submit-taste" placeholder="口味 (例：#酸#甜)" required />
+      <div style="display:flex; justify-content: space-between;">
+        <button id="submit-button">送出</button>
+        <button id="cancel-button" onclick="closeForm()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentCategory = 'sauce';
+
+    function renderResults(data) {
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+      if (!data.length) {
+        container.innerHTML = '<p>目前無符合條件的項目。</p>';
+        return;
+      }
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const name = item.name;
+        const description = item.description;
+        const taste = item.taste || '';
+        const intro = item.intro || '';
+        if (currentCategory === 'sauce') {
+          card.innerHTML = `
+            <h3>${name}</h3>
+            <p>所需醬料：${description}</p>
+            ${taste ? `<p>口味：${taste}</p>` : ''}
+            ${intro ? `<p>介紹：${intro}</p>` : ''}
+          `;
+        } else {
+          card.innerHTML = `
+            <h3>${name}</h3>
+            <p>鍋底配方：${description}</p>
+            ${taste ? `<p>口味：${taste}</p>` : ''}
+          `;
+        }
+        container.appendChild(card);
+      });
+    }
+
+    function loadItems(query = '') {
+      const container = document.getElementById('results');
+      container.innerHTML = '<p style="text-align:center;">🍲 載入中...</p>';
+      const params = new URLSearchParams();
+      if (query) params.append('query', query);
+      params.append('category', currentCategory);
+      fetch(`https://script.google.com/macros/s/AKfycbxU76zx0eLPtGb5EzjWh6gRyWfuKqlUgZaTXYsaec6YFQUKsG3wA_OeHjin0PzCwQ-M1w/exec?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => renderResults(data))
+        .catch(err => {
+          container.innerHTML = '<p style="text-align:center;color:red;">❌ 載入失敗，請稍後再試</p>';
+          console.error('載入失敗', err);
+        });
+    }
+
+    function handleSearch() {
+  let input = document.getElementById('flavor-input').value.trim();
+  if (!input) {
+    alert('請輸入口味關鍵字再搜尋！');
+    return;
+  }
+
+  
+  const flavorKeywords = ['酸', '辣', '麻', '甜', '香', '鹹', '苦', '濃', '淡', '蒜'];
+
+  
+  const matched = flavorKeywords.filter(keyword => input.includes(keyword));
+
+  const query = matched.length > 0 ? matched.join(' ') : input;
+
+  loadItems(query);
+}
+
+
+    function openForm() {
+      document.getElementById('submit-form').style.display = 'flex';
+      document.getElementById('submit-category').value = currentCategory;
+      document.getElementById('submit-category').dispatchEvent(new Event('change'));
+    }
+
+    function closeForm() {
+      document.getElementById('submit-form').style.display = 'none';
+    }
+
+    document.getElementById('submit-open-button').addEventListener('click', openForm);
+
+    document.getElementById('submit-category').addEventListener('change', () => {
+      const category = document.getElementById('submit-category').value;
+      const descWrapper = document.getElementById('description-wrapper');
+      if (category === 'broth') {
+        descWrapper.style.display = 'none';
+      } else {
+        descWrapper.style.display = 'block';
+      }
+    });
+
+    document.getElementById('submit-button').addEventListener('click', () => {
+      const category = document.getElementById('submit-category').value;
+      const name = document.getElementById('submit-name').value.trim();
+      const ingredients = document.getElementById('submit-ingredients').value.trim();
+      const description = document.getElementById('submit-description').value.trim();
+      const taste = document.getElementById('submit-taste').value.trim();
+
+      if (!name || !ingredients || !taste) {
+        alert('請填寫必填欄位（名稱、所需醬料、口味）');
+        return;
+      }
+
+      const postData = {
+        category,
+        name,
+        ingredients,
+        description,
+        taste
+      };
+
+      fetch('https://script.google.com/macros/s/AKfycbxU76zx0eLPtGb5EzjWh6gRyWfuKqlUgZaTXYsaec6YFQUKsG3wA_OeHjin0PzCwQ-M1w/exec', {
+        method: 'POST',
+        body: JSON.stringify(postData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('✅ 投稿成功，等待審核！');
+        closeForm();
+        document.getElementById('submit-name').value = '';
+        document.getElementById('submit-ingredients').value = '';
+        document.getElementById('submit-description').value = '';
+        document.getElementById('submit-taste').value = '';
+      })
+      .catch(err => {
+        alert('❌ 投稿失敗，請稍後再試');
+        console.error(err);
+      });
+    });
+
+    document.getElementById('search-button').addEventListener('click', handleSearch);
+    document.getElementById('flavor-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentCategory = tab.dataset.category;
+        document.getElementById('flavor-input').value = '';
+        loadItems();
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => loadItems());
+  </script>
+</body>
+</html>
